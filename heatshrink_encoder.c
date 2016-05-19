@@ -75,7 +75,7 @@ static uint8_t push_outgoing_bits(heatshrink_encoder *hse, output_info *oi);
 static void push_literal_byte(heatshrink_encoder *hse, output_info *oi);
 
 #if HEATSHRINK_DYNAMIC_ALLOC
-heatshrink_encoder *heatshrink_encoder_alloc(uint8_t window_sz2,
+heatshrink_encoder * ICACHE_FLASH_ATTR heatshrink_encoder_alloc(uint8_t window_sz2,
         uint8_t lookahead_sz2) {
     if ((window_sz2 < HEATSHRINK_MIN_WINDOW_BITS) ||
         (window_sz2 > HEATSHRINK_MAX_WINDOW_BITS) ||
@@ -111,7 +111,7 @@ heatshrink_encoder *heatshrink_encoder_alloc(uint8_t window_sz2,
     return hse;
 }
 
-void heatshrink_encoder_free(heatshrink_encoder *hse) {
+void ICACHE_FLASH_ATTR heatshrink_encoder_free(heatshrink_encoder *hse) {
     size_t buf_sz = (2 << HEATSHRINK_ENCODER_WINDOW_BITS(hse));
 #if HEATSHRINK_USE_INDEX
     size_t index_sz = sizeof(struct hs_index) + hse->search_index->size;
@@ -123,7 +123,7 @@ void heatshrink_encoder_free(heatshrink_encoder *hse) {
 }
 #endif
 
-void heatshrink_encoder_reset(heatshrink_encoder *hse) {
+void ICACHE_FLASH_ATTR heatshrink_encoder_reset(heatshrink_encoder *hse) {
     size_t buf_sz = (2 << HEATSHRINK_ENCODER_WINDOW_BITS(hse));
     memset(hse->buffer, 0, buf_sz);
     hse->input_size = 0;
@@ -142,7 +142,7 @@ void heatshrink_encoder_reset(heatshrink_encoder *hse) {
     #endif
 }
 
-HSE_sink_res heatshrink_encoder_sink(heatshrink_encoder *hse,
+HSE_sink_res ICACHE_FLASH_ATTR heatshrink_encoder_sink(heatshrink_encoder *hse,
         uint8_t *in_buf, size_t size, size_t *input_size) {
     if ((hse == NULL) || (in_buf == NULL) || (input_size == NULL)) {
         return HSER_SINK_ERROR_NULL;
@@ -195,7 +195,7 @@ static HSE_state st_save_backlog(heatshrink_encoder *hse);
 static HSE_state st_flush_bit_buffer(heatshrink_encoder *hse,
     output_info *oi);
 
-HSE_poll_res heatshrink_encoder_poll(heatshrink_encoder *hse,
+HSE_poll_res ICACHE_FLASH_ATTR heatshrink_encoder_poll(heatshrink_encoder *hse,
         uint8_t *out_buf, size_t out_buf_size, size_t *output_size) {
     if ((hse == NULL) || (out_buf == NULL) || (output_size == NULL)) {
         return HSER_POLL_ERROR_NULL;
@@ -257,7 +257,7 @@ HSE_poll_res heatshrink_encoder_poll(heatshrink_encoder *hse,
     }
 }
 
-HSE_finish_res heatshrink_encoder_finish(heatshrink_encoder *hse) {
+HSE_finish_res ICACHE_FLASH_ATTR heatshrink_encoder_finish(heatshrink_encoder *hse) {
     if (hse == NULL) { return HSER_FINISH_ERROR_NULL; }
     LOG("-- setting is_finishing flag\n");
     hse->flags |= FLAG_IS_FINISHING;
@@ -265,7 +265,7 @@ HSE_finish_res heatshrink_encoder_finish(heatshrink_encoder *hse) {
     return hse->state == HSES_DONE ? HSER_FINISH_DONE : HSER_FINISH_MORE;
 }
 
-static HSE_state st_step_search(heatshrink_encoder *hse) {
+static HSE_state ICACHE_FLASH_ATTR st_step_search(heatshrink_encoder *hse) {
     uint16_t window_length = get_input_buffer_size(hse);
     uint16_t lookahead_sz = get_lookahead_size(hse);
     uint16_t msi = hse->match_scan_index;
@@ -318,7 +318,7 @@ static HSE_state st_step_search(heatshrink_encoder *hse) {
     }
 }
 
-static HSE_state st_yield_tag_bit(heatshrink_encoder *hse,
+static HSE_state ICACHE_FLASH_ATTR st_yield_tag_bit(heatshrink_encoder *hse,
         output_info *oi) {
     if (can_take_byte(oi)) {
         if (hse->match_length == 0) {
@@ -335,7 +335,7 @@ static HSE_state st_yield_tag_bit(heatshrink_encoder *hse,
     }
 }
 
-static HSE_state st_yield_literal(heatshrink_encoder *hse,
+static HSE_state ICACHE_FLASH_ATTR st_yield_literal(heatshrink_encoder *hse,
         output_info *oi) {
     if (can_take_byte(oi)) {
         push_literal_byte(hse, oi);
@@ -347,7 +347,7 @@ static HSE_state st_yield_literal(heatshrink_encoder *hse,
     }
 }
 
-static HSE_state st_yield_br_index(heatshrink_encoder *hse,
+static HSE_state ICACHE_FLASH_ATTR st_yield_br_index(heatshrink_encoder *hse,
         output_info *oi) {
     if (can_take_byte(oi)) {
         LOG("-- yielding backref index %u\n", hse->match_pos);
@@ -363,7 +363,7 @@ static HSE_state st_yield_br_index(heatshrink_encoder *hse,
     }
 }
 
-static HSE_state st_yield_br_length(heatshrink_encoder *hse,
+static HSE_state ICACHE_FLASH_ATTR st_yield_br_length(heatshrink_encoder *hse,
         output_info *oi) {
     if (can_take_byte(oi)) {
         LOG("-- yielding backref length %u\n", hse->match_length);
@@ -379,7 +379,7 @@ static HSE_state st_yield_br_length(heatshrink_encoder *hse,
     }
 }
 
-static HSE_state st_save_backlog(heatshrink_encoder *hse) {
+static HSE_state ICACHE_FLASH_ATTR st_save_backlog(heatshrink_encoder *hse) {
     if (is_finishing(hse)) {
         /* copy remaining literal (if necessary) */
         if (has_literal(hse)) {
@@ -395,7 +395,7 @@ static HSE_state st_save_backlog(heatshrink_encoder *hse) {
     }
 }
 
-static HSE_state st_flush_bit_buffer(heatshrink_encoder *hse,
+static HSE_state ICACHE_FLASH_ATTR st_flush_bit_buffer(heatshrink_encoder *hse,
         output_info *oi) {
     if (hse->bit_index == 0x80) {
         LOG("-- done!\n");
@@ -410,26 +410,26 @@ static HSE_state st_flush_bit_buffer(heatshrink_encoder *hse,
     }
 }
 
-static void add_tag_bit(heatshrink_encoder *hse, output_info *oi, uint8_t tag) {
+static void ICACHE_FLASH_ATTR add_tag_bit(heatshrink_encoder *hse, output_info *oi, uint8_t tag) {
     LOG("-- adding tag bit: %d\n", tag);
     push_bits(hse, 1, tag, oi);
 }
 
-static uint16_t get_input_offset(heatshrink_encoder *hse) {
+static uint16_t ICACHE_FLASH_ATTR get_input_offset(heatshrink_encoder *hse) {
     return get_input_buffer_size(hse);
 }
 
-static uint16_t get_input_buffer_size(heatshrink_encoder *hse) {
+static uint16_t ICACHE_FLASH_ATTR get_input_buffer_size(heatshrink_encoder *hse) {
     return (1 << HEATSHRINK_ENCODER_WINDOW_BITS(hse));
     (void)hse;
 }
 
-static uint16_t get_lookahead_size(heatshrink_encoder *hse) {
+static uint16_t ICACHE_FLASH_ATTR get_lookahead_size(heatshrink_encoder *hse) {
     return (1 << HEATSHRINK_ENCODER_LOOKAHEAD_BITS(hse));
     (void)hse;
 }
 
-static void do_indexing(heatshrink_encoder *hse) {
+static void ICACHE_FLASH_ATTR do_indexing(heatshrink_encoder *hse) {
 #if HEATSHRINK_USE_INDEX
     /* Build an index array I that contains flattened linked lists
      * for the previous instances of every byte in the buffer.
@@ -468,33 +468,33 @@ static void do_indexing(heatshrink_encoder *hse) {
 #endif
 }
 
-static int is_finishing(heatshrink_encoder *hse) {
+static int ICACHE_FLASH_ATTR is_finishing(heatshrink_encoder *hse) {
     return hse->flags & FLAG_IS_FINISHING;
 }
 
-static int backlog_is_partial(heatshrink_encoder *hse) {
+static int ICACHE_FLASH_ATTR backlog_is_partial(heatshrink_encoder *hse) {
     return hse->flags & FLAG_BACKLOG_IS_PARTIAL;
 }
 
-static int backlog_is_filled(heatshrink_encoder *hse) {
+static int ICACHE_FLASH_ATTR backlog_is_filled(heatshrink_encoder *hse) {
     return hse->flags & FLAG_BACKLOG_IS_FILLED;
 }
 
-static int on_final_literal(heatshrink_encoder *hse) {
+static int ICACHE_FLASH_ATTR on_final_literal(heatshrink_encoder *hse) {
     return hse->flags & FLAG_ON_FINAL_LITERAL;
 }
 
-static int has_literal(heatshrink_encoder *hse) {
+static int ICACHE_FLASH_ATTR has_literal(heatshrink_encoder *hse) {
     return (hse->flags & FLAG_HAS_LITERAL);
 }
 
-static int can_take_byte(output_info *oi) {
+static int ICACHE_FLASH_ATTR can_take_byte(output_info *oi) {
     return *oi->output_size < oi->buf_size;
 }
 
 /* Return the longest match for the bytes at buf[end:end+maxlen] between
  * buf[start] and buf[end-1]. If no match is found, return -1. */
-static uint16_t find_longest_match(heatshrink_encoder *hse, uint16_t start,
+static uint16_t ICACHE_FLASH_ATTR find_longest_match(heatshrink_encoder *hse, uint16_t start,
         uint16_t end, const uint16_t maxlen, uint16_t *match_length) {
     LOG("-- scanning for match of buf[%u:%u] between buf[%u:%u] (max %u bytes)\n",
         end, end + maxlen, start, end + maxlen - 1, maxlen);
@@ -563,7 +563,7 @@ static uint16_t find_longest_match(heatshrink_encoder *hse, uint16_t start,
     return MATCH_NOT_FOUND;
 }
 
-static uint8_t push_outgoing_bits(heatshrink_encoder *hse, output_info *oi) {
+static uint8_t ICACHE_FLASH_ATTR push_outgoing_bits(heatshrink_encoder *hse, output_info *oi) {
     uint8_t count = 0;
     uint8_t bits = 0;
     if (hse->outgoing_bits_count > 8) {
@@ -584,7 +584,7 @@ static uint8_t push_outgoing_bits(heatshrink_encoder *hse, output_info *oi) {
 
 /* Push COUNT (max 8) bits to the output buffer, which has room.
  * Bytes are set from the lowest bits, up. */
-static void push_bits(heatshrink_encoder *hse, uint8_t count, uint8_t bits,
+static void ICACHE_FLASH_ATTR push_bits(heatshrink_encoder *hse, uint8_t count, uint8_t bits,
         output_info *oi) {
     ASSERT(count <= 8);
     LOG("++ push_bits: %d bits, input of 0x%02x\n", count, bits);
@@ -612,7 +612,7 @@ static void push_bits(heatshrink_encoder *hse, uint8_t count, uint8_t bits,
     }
 }
 
-static void push_literal_byte(heatshrink_encoder *hse, output_info *oi) {
+static void ICACHE_FLASH_ATTR push_literal_byte(heatshrink_encoder *hse, output_info *oi) {
     uint16_t processed_offset = hse->match_scan_index - 1;
     uint16_t input_offset = get_input_offset(hse) + processed_offset;
     uint8_t c = hse->buffer[input_offset];
@@ -621,7 +621,7 @@ static void push_literal_byte(heatshrink_encoder *hse, output_info *oi) {
     push_bits(hse, 8, c, oi);
 }
 
-static void save_backlog(heatshrink_encoder *hse) {
+static void ICACHE_FLASH_ATTR save_backlog(heatshrink_encoder *hse) {
     size_t input_buf_sz = get_input_buffer_size(hse);
     
     uint16_t msi = hse->match_scan_index;

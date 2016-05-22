@@ -8,6 +8,11 @@ CFLAGS += -Wmissing-prototypes
 CFLAGS += -Wstrict-prototypes
 CFLAGS += -Wmissing-declarations
 
+SDK_INCDIR	= include
+SDK_INCDIR	:= $(addprefix -I$(SDK_BASE)/,$(SDK_INCDIR))
+
+CFLAGS += $SDK_INCDIR
+
 # If libtheft is available, build additional property-based tests.
 # Uncomment these to use it in test_heatshrink_dynamic.
 #CFLAGS += -DHEATSHRINK_HAS_THEFT

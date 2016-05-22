@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include "heatshrink_encoder.h"
 
+#define ICACHE_FLASH_ATTR
+
 typedef enum {
     HSES_NOT_FULL,              /* input buffer not full enough */
     HSES_FILLED,                /* buffer is full */
